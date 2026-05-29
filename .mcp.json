@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "docx-editor": {
+      "command": "npx",
+      "args": ["-y", "@knorq/docx-mcp-server"]
+    },
+    "mcp-word": {
+      "command": "uv",
+      "args": ["run", "mcp_word"],
+      "env": {
+        "MCP_ALLOWED_DIRECTORIES": "/Users/jirongliu/Max/Development/Resume Writing"
+      }
+    }
+  }
+}
