@@ -1,23 +1,27 @@
 ---
 name: resume-tailor
-description: Tailor a resume to a specific job ad while maintaining 100% authenticity
-argument-hint: [resume_path] [job_ad_path]
+description: Tailor a resume to a specific job ad while maintaining authenticity
+argument-hint: [job_url_or_path]
 ---
 
 # Resume Tailor
 
 Tailor a candidate's resume to a specific job ad. Every change must remain authentic to the candidate's actual experience — never fabricate or exaggerate.
 
+The candidate may grant a percentage flexibility (e.g., "20% flexibility") to align experience, skills, and capabilities to the target role. Flexibility means: framing analogous experience as transferable, softening gap severity, and using job-ad language more freely — but still never fabricating.
+
 ## Source of Truth
 
 The **master resume** is at `/Users/jirongliu/Max/Development/Resume Writing/Resume_Master.docx`. This is the comprehensive, untrimmed version containing ALL experience, skills, achievements, and capabilities. Always start from the master resume when tailoring — never tailor from a previously tailored version.
 
-During tailoring, if new capabilities, achievements, or improved phrasings surface that are not yet in the master, flag them with the user. The master should be updated to capture these additions so it remains the complete source of truth for future applications.
+During tailoring, if new capabilities, achievements, or improved phrasings surface that are not yet in the master, note them. After all tailoring steps are complete, update the master resume and Skills Gap Analysis to capture these improvements so they remain available for future applications.
 
 ## Inputs
 
 1. **Master resume** (`Resume_Master.docx`) — always start here
-2. **Job ad file** (`.docx`) — the target job posting
+2. **Job ad** — either a `.docx` file path or a LinkedIn job URL (fetch via WebFetch)
+
+If the job ad is a LinkedIn URL, save the fetched content as a `.docx` in the application folder alongside the tailored resume.
 
 ## Process
 
@@ -44,8 +48,9 @@ Map against the resume and identify:
 ### Step 2: Professional Summary Overhaul
 
 Rewrite the title and summary. Techniques:
-- Change the professional title to closely mirror the target job title
-- Front-load the most relevant experience and technical keywords
+- Change the professional title to closely mirror the target job title, but avoid copy-pasting it verbatim — adapt the language (e.g., "Head of" can become "Leader of")
+- Front-load the most relevant experience and technical keywords from the job ad
+- Surface any personal connections to the organization (e.g., alumni status)
 - Provide 2-3 variations (e.g., Highly Tailored, Balanced, Punchy)
 - Wait for the user to pick one before proceeding
 
@@ -62,40 +67,86 @@ Restructure the skills section. Techniques:
 
 This is the core step. Go role by role, starting with the most recent/most relevant. For each role:
 
+**Before reordering bullets, rank the job requirements by importance.** This ranking drives the bullet order. Use three lenses:
+
+1. **Frequency** — how many times each requirement is mentioned across both the responsibilities and requirements sections
+2. **Position** — where it appears (earlier = more important; requirements section carries more weight than responsibilities)
+3. **Language strength** — the phrasing used: "Must" > "Proven track record" > "Demonstrated ability" > "Strong" > "Experience" > "is advantageous"
+
+Assign each requirement a theme (e.g., "Advisory & Influencing", "Innovation & Thought Leadership", "Team Leadership & Capability Uplift") and produce a ranked list. Present this to the user for approval before reordering bullets.
+
+**Then reorder bullets for each role**, placing bullets that demonstrate higher-ranked themes first. A bullet that directly matches a specific job requirement but supports a lower-ranked theme (e.g., reporting uplift at #5) should appear AFTER bullets that demonstrate higher-ranked themes (e.g., senior leadership at #1, advisory at #2).
+
+For each role:
 - **Role description**: Reframe to lead with team leadership, analytics, and commercial outcomes where relevant
-- **Reorder bullets** by relevance to the target role
+- **Reorder bullets** following the theme ranking — highest-priority themes first
 - **Rewrite bullets** using job ad verbs and framing while keeping factual claims intact
 - **Drop bullets** that are irrelevant (e.g., FS-specific governance for a healthcare role)
 - **Add bullets** only when genuinely supported by experience described in the resume
 - **Use specific numbers** where possible (team size, FTE hours saved, revenue impact)
 - **Explicitly name tools** used to achieve outcomes
+- **Bullet style**: The most recent/most relevant role (primary role) uses bold summary prefixes on each bullet (e.g., "Led Institution-Wide Uplift of Reporting and Visualisation Practices: ..."). All other roles use plain bullets without summary prefixes — the body text stands alone
 
 ### Step 5: Education & Technology Stack
 
 - Reorder tech stack categories so most role-relevant items appear first
+- Merge similar categories to reduce rows (e.g., "Analytics & Data Science" + "Enterprise Data Platforms" → "Analytics, Data Science & Platforms")
+- Generalize organization-specific platform names where appropriate (e.g., "Corporate Data Hub" → "Data Warehouse")
 - Add emerging categories not in the original (e.g., AI & Emerging Tech) if supported by experience
-- Reorder education and qualifications by relevance
+- Reorder education and qualifications by relevance; front-load any connection to the hiring institution
 - Separate formal degrees from professional certifications
 
 ### Step 6: Final Polish & Build
 
 Do a final quality pass then build the `.docx` file. Create a folder named after the role and company, copy the job ad in with a `Job Ad_` prefix, and save the tailored resume.
 
+**Quality checks before finalizing:**
+- Run a formatting review on the `.docx` — verify section header shading, Wingdings bullets, company name colors, job title backgrounds, and role description italics are all present
+- Check for formatting leaks: contact line should NOT be bold; role descriptions SHOULD be italic
+- Check for double spaces (common in tech stack label runs)
+- Verify consistent spelling (Australian English: "organisation" not "organization")
+- Scan for residual industry jargon from the candidate's current sector that doesn't apply to the target role
+- Run a character count to estimate page length (target: 2-3 pages)
+
+**If edits are needed after the initial build**, patch the raw XML directly via `lxml` rather than rebuilding from scratch.
+
 Key formatting conventions for the output `.docx`:
-- Page: A4 (7562850 x 10693400 EMU), 0.5-inch margins (457200 EMU)
-- Name: 24pt bold centered
-- Contact: 10.5pt centered
-- Title: 13pt, #44526A color, centered
-- Section headers: white text on #44526A background, 12pt bold centered (use paragraph shading)
-- Company names: 12pt, #44526A, centered (Heading 1 style)
+- Page: A4 (11907000 x 16840000 EMU), 0.5-inch margins (Inches)
+- Name: 24pt bold centered (size 48 in half-points)
+- Contact: 10.5pt (size 21)
+- Title: 13pt (size 26), #44526A color, centered
+- Section headers: white text on #44526A background, 12pt bold centered (paragraph shading `w:fill="44526A"`)
+- Company names: 12pt, #44526A, centered
 - Job titles: 10pt on #D4DCE3 background (paragraph shading)
-- Bullets: List Paragraph style with Wingdings 'l' dot separators in #1D4575, hanging indent
-- Education/Tech labels: bold first part, regular rest, 10pt
-- Tech stack: 2-column table with bold labels in column 1 and values in column 2
+- Role descriptions: 10pt italic, left/right indent
+- Bullets: Wingdings 'l' dot separators in #1D4575, hanging indent (left="360" hanging="180")
+- Areas of Expertise: flowing paragraph with Wingdings 'l' separators in #1D4575 between skills
+- Tech stack: labelrun bold, then value run regular, each on its own line
+- Education/Qualification labels: bold label, regular value
+
+## Post-Tailoring: Update Master Resume & Skills Gap Analysis
+
+After all tailoring steps are complete and the output is approved, update these files so improvements feed back into the source of truth:
+
+**Resume_Master.docx:**
+- Add any new Areas of Expertise phrasings that surfaced during tailoring (but keep ALL existing skills — the master is the comprehensive superset)
+- Reorganize Tech Stack to match improved category structure from the tailoring
+- Do NOT add role-specific summary or bullet changes — the master retains its original comprehensive bullets
+
+**Skills_Gap_Analysis.xlsx:**
+- Skills Matrix: Add a new column for this job with ratings for all existing and new skills
+- Gap Summary: Add rows for each identified gap with severity and action plan
+- Use `openpyxl` and preserve existing formatting
 
 ## Working with .docx Files
 
-Use `python-docx` for normal files. For files that fail to parse, fall back to `lxml` on the ZIP's internal `word/document.xml`.
+Build new files with `python-docx`. For files that fail to parse or need surgical fixes, fall back to `lxml` on the ZIP's internal `word/document.xml`.
+
+**Always use the correct XML namespace for xml:space:**
+```python
+t.set('{http://www.w3.org/XML/1998/namespace}space', 'preserve')
+```
+Never use `{http://schemas.xml:lang}space` — it is not a valid URI and will corrupt the document.
 
 Extract full paragraph text:
 ```python
@@ -128,6 +179,34 @@ sep.font.size = Pt(10)
 sep.font.color.rgb = RGBColor(0x1D, 0x45, 0x75)
 ```
 
+Patching raw XML after build (for surgical fixes):
+```python
+import zipfile, io
+from lxml import etree
+
+with zipfile.ZipFile(path, 'r') as zf:
+    doc_xml_str = zf.read('word/document.xml').decode('utf-8')
+    files = {name: zf.read(name) for name in zf.namelist()}
+
+root = etree.fromstring(doc_xml_str.encode('utf-8'))
+nsmap = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
+
+# Find and fix specific elements...
+# For removing bold from a run:
+#   rPr = run.find('.//w:rPr', nsmap)
+#   b = rPr.find('.//w:b', nsmap)
+#   if b is not None: rPr.remove(b)
+
+new_xml = etree.tostring(root, xml_declaration=True, encoding='UTF-8', standalone=True)
+files['word/document.xml'] = new_xml
+buf = io.BytesIO()
+with zipfile.ZipFile(buf, 'w', zipfile.ZIP_DEFLATED) as out:
+    for name, data in files.items():
+        out.writestr(name, data)
+with open(path, 'wb') as f:
+    f.write(buf.getvalue())
+```
+
 ## Rules
 
 - Never fabricate experience, metrics, or skills the candidate doesn't have
@@ -135,3 +214,5 @@ sep.font.color.rgb = RGBColor(0x1D, 0x45, 0x75)
 - Present changes for user approval at each step — do not skip ahead
 - Keep the original resume's formatting conventions (fonts, margins, shading, bullet style)
 - When dropping bullets or skills, explain why so the user can make an informed decision
+- Use Australian English spelling ("organisation", "visualisation", "utilisation") — consistent across all output
+- After tailoring is complete, feed back improvements to Resume_Master.docx and Skills_Gap_Analysis.xlsx
