@@ -16,6 +16,16 @@ The **master resume** is at `/Users/jirongliu/Max/Development/Resume Writing/Res
 
 During tailoring, if new capabilities, achievements, or improved phrasings surface that are not yet in the master, note them. After all tailoring steps are complete, update the master resume and Skills Gap Analysis to capture these improvements so they remain available for future applications.
 
+## Formatting Reference
+
+The canonical formatting reference is the USyd tailored resume at:
+
+```
+Head of Student Insights and Analytics - University of Sydney/Resume_Max Liu_Head of Student Insights and Analytics.docx
+```
+
+Always extract formatting from this file when building a new resume — it is the gold standard. Do not rely on hardcoded sizes in this skill file; they may drift. Verify against the reference.
+
 ## Inputs
 
 1. **Master resume** (`Resume_Master.docx`) — always start here
@@ -62,6 +72,7 @@ Restructure the skills section. Techniques:
 - Consolidate similar skills to keep the list tight
 - Format as a flowing paragraph with Wingdings separators (matching resume convention)
 - Keep the section scannable for ATS
+- Drop skills that are already covered in the Tech Stack section (avoid duplication)
 
 ### Step 4: Professional Experience Reframing
 
@@ -90,7 +101,7 @@ For each role:
 ### Step 5: Education & Technology Stack
 
 - Reorder tech stack categories so most role-relevant items appear first
-- Merge similar categories to reduce rows (e.g., "Analytics & Data Science" + "Enterprise Data Platforms" → "Analytics, Data Science & Platforms")
+- Merge similar categories to reduce rows (e.g., "Data Viz & Reporting" + "Analytics, Data Science & Platforms" → "Analytics, Data Platforms & Visualisation")
 - Generalize organization-specific platform names where appropriate (e.g., "Corporate Data Hub" → "Data Warehouse")
 - Add emerging categories not in the original (e.g., AI & Emerging Tech) if supported by experience
 - Reorder education and qualifications by relevance; front-load any connection to the hiring institution
@@ -102,41 +113,77 @@ Do a final quality pass then build the `.docx` file. Create a folder named after
 
 **Quality checks before finalizing:**
 - Run a formatting review on the `.docx` — verify section header shading, Wingdings bullets, company name colors, job title backgrounds, and role description italics are all present
-- Check for formatting leaks: contact line should NOT be bold; role descriptions SHOULD be italic
+- Check for formatting leaks: contact line should NOT be bold or italic; name should be bold only (not italic); title and company names should be bold only (not italic)
 - Check for double spaces (common in tech stack label runs)
-- Verify consistent spelling (Australian English: "organisation" not "organization")
+- Verify consistent spelling (Australian English: "organisation" not "organization", "visualisation" not "visualization")
 - Scan for residual industry jargon from the candidate's current sector that doesn't apply to the target role
 - Run a character count to estimate page length (target: 2-3 pages)
 
-**If edits are needed after the initial build**, patch the raw XML directly via `lxml` rather than rebuilding from scratch.
+**If small edits are needed after the initial build**, patch the raw XML directly via `lxml` rather than rebuilding from scratch. For systemic formatting issues (wrong font sizes across the entire document), rebuild — don't patch.
 
-Key formatting conventions for the output `.docx`:
-- Page: A4 (11907000 x 16840000 EMU), 0.5-inch margins (Inches)
-- Name: 24pt bold centered (size 48 in half-points)
-- Contact: 10.5pt (size 21)
-- Title: 13pt (size 26), #44526A color, centered
-- Section headers: white text on #44526A background, 12pt bold centered (paragraph shading `w:fill="44526A"`)
-- Company names: 12pt, #44526A, centered
-- Job titles: 10pt on #D4DCE3 background (paragraph shading)
-- Role descriptions: 10pt italic, left/right indent
-- Bullets: Wingdings 'l' dot separators in #1D4575, hanging indent (left="360" hanging="180")
-- Areas of Expertise: flowing paragraph with Wingdings 'l' separators in #1D4575 between skills
-- Tech stack: labelrun bold, then value run regular, each on its own line
-- Education/Qualification labels: bold label, regular value
+## Formatting Conventions
+
+Extract exact font sizes, spacing, and colors from the USyd reference resume before building. Key conventions verified against the reference:
+
+**Page Setup:**
+- A4 (11907000 x 16840000 EMU), 0.5-inch margins (Inches)
+
+**Elements (verified against USyd reference):**
+- Name: 36pt bold centered — bold only, never italic
+- Contact: 16pt regular centered — no bold, no italic
+- Title: 20pt bold, #44526A, centered — bold only, never italic
+- Summary: 14pt regular, before=80 after=40
+- Section headers: 20pt bold, white text on #44526A background, centered, before=240 after=60
+- Areas of Expertise: 14pt flowing paragraph, Wingdings 'l' separators in #1D4575, before=80 after=40
+- Company names: 20pt bold, #44526A, centered, before=200 after=0 — bold only, never italic
+- Job titles: 16pt bold on #D4DCE3 background (paragraph shading), centered, before=0 after=40
+- Role descriptions: 14pt italic, left indent (360 twips), before=40 after=120
+- Primary bullets (most recent role): 14pt, Wingdings 'l' dot in #1D4575, left=360 hanging=180, before=120 after=120. Bold summary prefix ending with `: ` then regular body text
+- Secondary bullets (other roles): 14pt, Wingdings 'l' dot in #1D4575, left=374 hanging=187, before=120 after=120. All regular text — no bold prefix
+- ADDITIONAL EXPERIENCE header: 14pt bold, left-aligned, NO blue shading (not a section header)
+- Additional role job title: 14pt regular, left indent, NO #D4DCE3 shading (not a main job title)
+- Education sub-headers ("EDUCATION", "PROFESSIONAL QUALIFICATIONS"): 14pt bold, before=0 after=0
+- Education items: 14pt regular, left indent — NOT italic
+- Professional Qualifications items: 14pt italic, left indent, before=40 after=120
+- Tech stack: 14pt, bold label run + regular value run, before=0 after=0
+- References: 14pt italic, centered
+
+**Colors:**
+- Dark blue: #44526A (section headers, company names, title)
+- Dot blue: #1D4575 (Wingdings bullets and AoE separators)
+- White: #FFFFFF (section header text)
+- Light grey background: #D4DCE3 (job title paragraph shading)
+- Dark blue background: #44526A (section header paragraph shading)
+
+## python-docx Boolean Trap
+
+**Never set `run.bold = False` or `run.italic = False`.** python-docx creates `<w:b w:val="false"/>` or `<w:i w:val="false"/>` elements which still register as bold/italic formatting. This causes invisible style leaks that are hard to diagnose.
+
+```python
+# WRONG — creates unwanted w:i element
+run.italic = False
+
+# RIGHT — only set when True, omit otherwise
+if italic:
+    run.italic = True
+```
+
+Same rule applies to `run.bold`. Always wrap in `if bold:` / `if italic:` conditions.
 
 ## Post-Tailoring: Update Master Resume & Skills Gap Analysis
 
 After all tailoring steps are complete and the output is approved, update these files so improvements feed back into the source of truth:
 
 **Resume_Master.docx:**
-- Add any new Areas of Expertise phrasings that surfaced during tailoring (but keep ALL existing skills — the master is the comprehensive superset)
-- Reorganize Tech Stack to match improved category structure from the tailoring
+- Add any new Areas of Expertise phrasings that surfaced during tailoring (but keep ALL existing skills — the master is the comprehensive superset). Insert new items alongside related existing items for logical grouping
+- Reorganize Tech Stack to match improved category structure from the tailoring. Merge similar rows to reduce category count
 - Do NOT add role-specific summary or bullet changes — the master retains its original comprehensive bullets
 
 **Skills_Gap_Analysis.xlsx:**
-- Skills Matrix: Add a new column for this job with ratings for all existing and new skills
-- Gap Summary: Add rows for each identified gap with severity and action plan
+- Skills Matrix: Add a new column for this job with ratings for all existing and new skills. Add rows for any new skills surfaced by the job ad
+- Gap Summary: Add rows for each identified gap with severity, the job name, and a detailed action plan for how to address it
 - Use `openpyxl` and preserve existing formatting
+- Use `insert_rows()` rather than shifting cells manually to avoid StyleProxy errors
 
 ## Working with .docx Files
 
@@ -179,6 +226,12 @@ sep.font.size = Pt(10)
 sep.font.color.rgb = RGBColor(0x1D, 0x45, 0x75)
 ```
 
+Bullet indent (hanging indent via raw XML):
+```python
+ind = parse_xml(f'<w:ind {nsdecls("w")} w:left="360" w:hanging="180"/>')
+pPr.append(ind)
+```
+
 Patching raw XML after build (for surgical fixes):
 ```python
 import zipfile, io
@@ -216,3 +269,6 @@ with open(path, 'wb') as f:
 - When dropping bullets or skills, explain why so the user can make an informed decision
 - Use Australian English spelling ("organisation", "visualisation", "utilisation") — consistent across all output
 - After tailoring is complete, feed back improvements to Resume_Master.docx and Skills_Gap_Analysis.xlsx
+- Match the USyd reference resume formatting exactly — extract and verify, don't assume
+- Rebuild from scratch for systemic formatting fixes; patch raw XML only for small surgical changes
+- Never set `run.bold = False` or `run.italic = False` in python-docx — conditionally set True only
